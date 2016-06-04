@@ -57,6 +57,7 @@ namespace W2.PacketSniffer.Core
         private bool m_isFragmenting = false;
         private int m_fragmentHeaderSize;
         private int m_totalFragmentsSize;
+        private int m_firstFragmentSize;
 
         public W2NetworkSniffer(IPAddress interfaceAddress, IPAddress address, 
             int port)
@@ -150,6 +151,8 @@ namespace W2.PacketSniffer.Core
             return buffer;
         }
 
+        private const int PacketHeaderSize = 12;
+
         private const int MaxFragments = 100;
 
         private const int MaxPacketSize = 5000;
@@ -172,17 +175,19 @@ namespace W2.PacketSniffer.Core
                 if (helloPacket == 0x1F11F311)
                     return;
             }
-            else if (dataLength < 12) // Not a valid 12-byte header at least.
+            else if (dataLength < PacketHeaderSize) // Not a valid 12-byte header.
                 return;
-            else // Data >= 12 
+            else // Data >= sizeof(PacketHeader)
             {
                 if (m_isFragmenting) // Is a fragment
                 {
-                    // We received the last fragment
-                    if ((m_totalFragmentsSize + dataLength) >= m_fragmentHeaderSize)
+                    // If the received length is less than the first fragment length
+                    // and the total fragments can carry at least 1 full header specified message
+                    if (dataLength < m_firstFragmentSize && 
+                        (m_totalFragmentsSize + dataLength) >= m_fragmentHeaderSize)
                     { // Add the last fragment to the list
                         AddFragment(address, ipHeader.Id, dataOffset, dataLength);
-
+                        // Consolidate the message into a single buffer.
                         var msgBuffer = ConsolidateFragments(address);
 
                         if (msgBuffer == null)
@@ -192,7 +197,8 @@ namespace W2.PacketSniffer.Core
                         var currentOffset = 0;
 
                         fixed (byte* pMsgBuffer = msgBuffer)
-                        {
+                        {   // We need a do-while loop, because we may get two messages
+                            // glued together by tcp-fragmentation.
                             do
                             {
                                 var pSize = *(ushort*)&pMsgBuffer[currentOffset];
@@ -203,16 +209,19 @@ namespace W2.PacketSniffer.Core
 
                                 remaining -= pSize;
 
+                                // Creates a new buffer, with only the current packet.
+                                // This ensures that we will not use the same underlyng buffer
+                                // because this buffer will be stored by the forms...
                                 byte[] packetBuffer = new byte[pSize];
 
                                 W2MarshalHelper.BufferCopy(msgBuffer, currentOffset, packetBuffer, 0, pSize);
 
-                                PacketReceived?.Raise(this, new W2PacketEventArgs(
-                                    pHeader, direction, ipHeader, tcpHeader, packetBuffer));
+                                PacketReceived.Raise(this, new W2PacketEventArgs(pHeader, direction, ipHeader, 
+                                    tcpHeader, packetBuffer));
 
                                 currentOffset += pSize;
 
-                            } while (remaining >= 12);
+                            } while (remaining >= PacketHeaderSize);
                         }
                         m_isFragmenting = false;
                         m_fragmentHeaderSize = 0;
@@ -220,7 +229,7 @@ namespace W2.PacketSniffer.Core
                         m_fragmentedBuffers[address].Clear();
                         return;
                     }
-                    else // not enough data, more fragments to come...
+                    else
                     {
                         AddFragment(address, ipHeader.Id, dataOffset, dataLength);
                         return;
@@ -229,14 +238,14 @@ namespace W2.PacketSniffer.Core
                 // Gets the first ushort, which is supposed to carry the size of the packet.
                 var headerSize = *(ushort*)&data[dataOffset];
                 // Not a valid packet size.
-
-                if (headerSize < 12 || headerSize > MaxPacketSize)
+                if (headerSize < PacketHeaderSize || headerSize > MaxPacketSize)
                     return;
 
                 if (headerSize > dataLength) // The packet will be fragmented.
                 {
                     AddFragment(address, ipHeader.Id, dataOffset, dataLength);
                     m_isFragmenting = true;
+                    m_firstFragmentSize = dataLength;
                     m_fragmentHeaderSize = headerSize;
                     return;
                 }
@@ -260,12 +269,12 @@ namespace W2.PacketSniffer.Core
 
                         W2MarshalHelper.BufferCopy(m_buffer, currentOffset, packetBuffer, 0, pSize);
 
-                        PacketReceived?.Raise(this, new W2PacketEventArgs(
-                            pHeader, direction, ipHeader, tcpHeader, packetBuffer));
+                        PacketReceived.Raise(this, new W2PacketEventArgs(pHeader, direction, ipHeader, tcpHeader, 
+                            packetBuffer));
 
                         currentOffset += pSize;
 
-                    } while (remaining >= 12);
+                    } while (remaining >= PacketHeaderSize);
                 }
             }
         }

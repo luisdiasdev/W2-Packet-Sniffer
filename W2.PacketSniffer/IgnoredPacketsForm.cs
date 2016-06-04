@@ -14,6 +14,10 @@ namespace W2.PacketSniffer
             InitializeComponent();
         }
 
+        /// <summary>
+        /// Sets the current ignored packet list.
+        /// </summary>
+        /// <param name="ignoredPackets">The ignored packets object.</param>
         public void SetIgnoredPackets(IgnoredPackets ignoredPackets)
         {
             m_ignoredPackets = ignoredPackets;

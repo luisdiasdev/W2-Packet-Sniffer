@@ -1,5 +1,8 @@
 ﻿namespace W2.PacketSniffer.Core
 {
+    /// <summary>
+    /// Represents the default W2 Packet Header.
+    /// </summary>
     public class PacketHeader
     {
         public ushort Size;
@@ -9,7 +12,12 @@
         public ushort ClientId;
         public uint TimeStamp;
 
-        public static unsafe PacketHeader Parse(byte* pBuffer, int offset = 0)
+        /// <summary>
+        /// Parses a buffer containing the W2 Packet Header data.
+        /// </summary>
+        /// <param name="pBuffer">The unsafe pointer to the first element of the buffer.</param>
+        /// <returns>A new PacketHeader object.</returns>
+        public static unsafe PacketHeader Parse(byte* pBuffer)
         {
             var header = new PacketHeader();
 

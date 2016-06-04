@@ -87,7 +87,7 @@ namespace W2.PacketSniffer.Core
 
                 await WaitForMessages(m_cts.Token);
             }
-            catch(SocketException ex)
+            catch(SocketException)
             {
                 // TODO: Handle exceptions
             }
@@ -134,10 +134,10 @@ namespace W2.PacketSniffer.Core
             {
                 if (m_rawSocket != null)
                 {
-                    var numReceived =
+                    var bytesReceived =
                         await m_rawSocket.ReceiveTaskAsync(m_buffer, 0, m_buffer.Length, SocketFlags.None);
 
-                    OnMessageReceived(numReceived);
+                    OnMessageReceived(bytesReceived);
                 }
             }
 

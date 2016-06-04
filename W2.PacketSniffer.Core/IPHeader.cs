@@ -2,6 +2,9 @@
 
 namespace W2.PacketSniffer.Core
 {
+    /// <summary>
+    /// Enumerates the IP Protocol Types
+    /// </summary>
     public enum IPProtocol
     {
         ICMP = 1,
@@ -11,6 +14,9 @@ namespace W2.PacketSniffer.Core
         Unknown = -1
     }
 
+    /// <summary>
+    /// Enumerates the IP Version Types
+    /// </summary>
     public enum IPVersion
     {
         IPv4,
@@ -18,6 +24,9 @@ namespace W2.PacketSniffer.Core
         Unknown
     }
 
+    /// <summary>
+    /// Represents the IP datagram header.
+    /// </summary>
     public class IPHeader
     {
         public const int MinimumIPHeaderSize = 20;
@@ -38,6 +47,11 @@ namespace W2.PacketSniffer.Core
         public bool DontFragment;
         public bool MoreFragments;
 
+        /// <summary>
+        /// Parses a buffer containing the IPHeader data.
+        /// </summary>
+        /// <param name="buffer">The unsafe pointer to the first element of the buffer.</param>
+        /// <returns>A new IPHeader object.</returns>
         public unsafe static IPHeader ParseIPHeader(byte* buffer)
         {
             var header = new IPHeader();

@@ -20,6 +20,10 @@ namespace W2.PacketSniffer
                 hexPacketView.CurrentLine - 1, hexPacketView.CurrentPositionInLine - 1);
         }
 
+        /// <summary>
+        /// Initializes the details form with the given packet data.
+        /// </summary>
+        /// <param name="packet"></param>
         public void InitializePacketDetails(W2PacketEventArgs packet)
         {
             hexPacketView.ByteProvider = new DynamicByteProvider(packet.Buffer);

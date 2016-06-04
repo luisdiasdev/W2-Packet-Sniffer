@@ -26,13 +26,20 @@ namespace W2.PacketSniffer.Core
             0x21, 0x19
         };
 
+        /// <summary>
+        /// Decrypts a buffer, with the specified length, starting at the given offset.
+        /// </summary>
+        /// <param name="pBuffer">The unsafe pointer to the buffer.</param>
+        /// <param name="length">The number of bytes that are in this message.</param>
+        /// <param name="offset">The starting offset of the message inside the buffer.</param>
+        /// <returns>Returns true if successful, false otherwise.</returns>
         public static unsafe bool Decrypt(byte* pBuffer, int length, int offset = 0)
         {
             uint keyIncrement = keyTable[(pBuffer[2 + offset] * 2)];
             uint keyResult = 0;
             byte checksumEnc = 0;
             byte checksumDec = 0;
-            bool sucessfull = true;
+            bool sucessful = true;
 
             for (int i = 4, thisIterator = 0; i < length; i++, keyIncrement++)
             {
@@ -65,61 +72,9 @@ namespace W2.PacketSniffer.Core
             }
 
             if (pBuffer[3 + offset] != (byte)(checksumEnc - checksumDec))
-                sucessfull = false;
+                sucessful = false;
 
-            return sucessfull;
-        }
-
-        /// <summary>
-        /// Encrypts the packet data and initialize the packet header.
-        /// </summary>
-        /// <param name="pBuffer">Pointer to the packet buffer.</param>
-        /// <param name="offset">Offset where the packet starts in the buffer.</param>
-        public static unsafe void Encrypt(byte[] buffer, int offset = 0)
-        {
-            fixed(byte* pBuffer = buffer)
-            {
-                byte checksumEnc = 0;
-                byte checksumDec = 0;
-                byte keyResult = 0;
-
-                var pKey = pBuffer[2];
-                var pSize = *(ushort*)&pBuffer[0];
-
-                uint keyIncrement = (uint)(keyTable[pKey * 2] & 0xFF);
-
-                for (uint i = 4, loopIterator = 0; i < pSize; i++, keyIncrement++)
-                {
-                    checksumDec += pBuffer[offset + i];
-
-                    keyResult = keyTable[((keyIncrement & 0x800000FF) * 2) + 1];
-
-                    loopIterator = i & 3;
-
-                    switch (loopIterator)
-                    {
-                        case 0:
-                            pBuffer[offset + i] += (byte)(keyResult * 2);
-                            break;
-
-                        case 1:
-                            pBuffer[offset + i] -= (byte)((int)keyResult >> 3);
-                            break;
-
-                        case 2:
-                            pBuffer[offset + i] += (byte)(keyResult * 4);
-                            break;
-
-                        case 3:
-                            pBuffer[offset + i] -= (byte)((int)keyResult >> 5);
-                            break;
-                    }
-
-                    checksumEnc += pBuffer[offset + i];
-                }
-
-                pBuffer[3] = (byte)(checksumEnc - checksumDec);
-            }
+            return sucessful;
         }
     }
 }

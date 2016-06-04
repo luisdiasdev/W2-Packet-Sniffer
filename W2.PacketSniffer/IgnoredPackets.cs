@@ -4,6 +4,9 @@ using System.IO;
 
 namespace W2.PacketSniffer
 {
+    /// <summary>
+    /// Represents the packets that will be ignored by the logger.
+    /// </summary>
     public class IgnoredPackets
     {
         private MultiValueDictionary<int, int> m_ignoredPackets;
@@ -13,10 +16,22 @@ namespace W2.PacketSniffer
             m_ignoredPackets = new MultiValueDictionary<int, int>();
         }
 
+        /// <summary>
+        /// Adds a new entry to the list.
+        /// </summary>
+        /// <param name="opCode">The opcode of the packet.</param>
+        /// <param name="size">The size of the packet, in bytes.</param>
         public void Add(int opCode, int size)
         {
             m_ignoredPackets.Add(opCode, size);
         }
+        /// <summary>
+        /// Removes an entry from the list.
+        /// If after removing this entry, the opcode list is empty,
+        /// the opcode is then removed from the list as well.
+        /// </summary>
+        /// <param name="opCode">The opcode of the packet.</param>
+        /// <param name="size">The size of the packet, in bytes.</param>
         public void Remove(int opCode, int size)
         {
             m_ignoredPackets.Remove(opCode, size);
@@ -28,18 +43,36 @@ namespace W2.PacketSniffer
             }
         }
 
+        /// <summary>
+        /// Gets the number of ignored packets.
+        /// </summary>
         public int Count => m_ignoredPackets.Count;
 
+        /// <summary>
+        /// Check if the list contains the given opcode.
+        /// </summary>
+        /// <param name="opCode">The opcode of the packet.</param>
+        /// <returns>Returns true if the list contains the opcode, false otherwise.</returns>
         public bool ContainsOpCode(int opCode)
         {
             return m_ignoredPackets.ContainsKey(opCode);
         }
 
+        /// <summary>
+        /// Check if the list contains the opcode and the associated size.
+        /// </summary>
+        /// <param name="opCode">The opcode of the packet.</param>
+        /// <param name="size">The size of the packet.</param>
+        /// <returns>Returns true if the list contains both the opcode and size, false otherwise.</returns>
         public bool ContainsOpCodeAndSize(int opCode, int size)
         {
             return m_ignoredPackets.Contains(opCode, size);
         }
 
+        /// <summary>
+        /// Gets the ignored packets as formatted strings.
+        /// </summary>
+        /// <returns></returns>
         public IEnumerable<string> GetFormatedValues()
         {
             foreach(var kvp in m_ignoredPackets)
@@ -48,6 +81,11 @@ namespace W2.PacketSniffer
                     yield return string.Format("OpCode {0:X2} Size {1}", kvp.Key, size);
             }
         }
+
+        /// <summary>
+        /// Saves the current ignored packet list to a file.
+        /// </summary>
+        /// <param name="filePath">The file path.</param>
         public void SaveToFile(string filePath)
         {
             using (var sw = new StreamWriter(filePath, false))
@@ -66,6 +104,10 @@ namespace W2.PacketSniffer
                 }
             }
         }
+        /// <summary>
+        /// Loads the ignored packet list from a file.
+        /// </summary>
+        /// <param name="filePath">The file path.</param>
         public void LoadFromFile(string filePath)
         {
             using (var tr = new StreamReader(filePath))

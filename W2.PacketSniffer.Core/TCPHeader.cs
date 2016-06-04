@@ -3,6 +3,9 @@ using System.Net;
 
 namespace W2.PacketSniffer.Core
 {
+    /// <summary>
+    /// Enumerates the possible TCP Header Flags
+    /// </summary>
     [Flags]
     public enum TCPFlags
     {
@@ -14,6 +17,9 @@ namespace W2.PacketSniffer.Core
         URG = 0x20,
     }
 
+    /// <summary>
+    /// Represents the TCP header.
+    /// </summary>
     public class TCPHeader
     {
         public const int MinimumTCPHeaderSize = 20;
@@ -29,6 +35,11 @@ namespace W2.PacketSniffer.Core
         public ushort Checksum;
         public ushort UrgentPointer;
 
+        /// <summary>
+        /// Parses a buffer containing the TCP Header data.
+        /// </summary>
+        /// <param name="buffer">The unsafe pointer to the first element of the buffer.</param>
+        /// <returns>A new TCPHeader object.</returns>
         public static unsafe TCPHeader ParseTCPHeader(byte* buffer)
         {
             var tcpHeader = new TCPHeader();

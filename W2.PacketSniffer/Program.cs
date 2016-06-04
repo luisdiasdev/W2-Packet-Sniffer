@@ -16,13 +16,7 @@ namespace W2.PacketSniffer
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            try
-            {
-                Application.Run(new MainForm());
-            }
-            catch(Exception)
-            {
-            }
+            Application.Run(new MainForm());
         }
     }
 }

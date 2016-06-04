@@ -44,11 +44,15 @@ namespace W2.PacketSniffer
             {
                 txtWatchOnAddress.Text = "";
                 e.Cancel = true;
-                toolTipStartForm.Show("The value is not a valid IPV4 address.",
-                    txtWatchOnAddress, 1500);
+                toolTipStartForm.Show("The value is not a valid IPV4 address.", txtWatchOnAddress, 1500);
             }
         }
 
+        /// <summary>
+        /// Gets a <code>W2NetworkSniffer</code> from the
+        /// startup information.
+        /// </summary>
+        /// <returns>A valid <c>W2NetworkSniffer</c> object.</returns>
         public W2NetworkSniffer GetSniffer()
         {
             if (cmbInterfaceAddresses.SelectedIndex == -1)
