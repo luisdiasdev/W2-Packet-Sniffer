@@ -235,6 +235,14 @@ namespace W2.PacketSniffer.Core
                         return;
                     }
                 }
+
+                if(dataLength == 120)
+                {
+                    var helloPacket = *(uint*)&data[dataOffset];
+                    if (helloPacket == 0x1F11F311)
+                        dataOffset += 4;
+                }
+
                 // Gets the first ushort, which is supposed to carry the size of the packet.
                 var headerSize = *(ushort*)&data[dataOffset];
                 // Not a valid packet size.

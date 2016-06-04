@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Reflection;
 using System.Text;
 using System.Windows.Forms;
 using W2.PacketSniffer.Core;
@@ -12,12 +11,6 @@ namespace W2.PacketSniffer
         public DetailsForm()
         {
             InitializeComponent();
-        }
-
-        private void SetLogText()
-        {
-            lblCurrentPosition.Text = string.Format("Line: {0}\t Column: {1}",
-                hexPacketView.CurrentLine - 1, hexPacketView.CurrentPositionInLine - 1);
         }
 
         /// <summary>
@@ -34,17 +27,21 @@ namespace W2.PacketSniffer
                 .Append(packet.Direction.ToString())
                 .Append($" Size: {packet.PacketHeader.Size}");
 
-            this.Text = sb.ToString();
 
-            SetLogText();
+            txtPacketCheckSum.Text = packet.PacketHeader.Checksum.ToString();
+            txtPacketClientId.Text = packet.PacketHeader.ClientId.ToString();
+            txtPacketKey.Text = packet.PacketHeader.Key.ToString();
+            txtPacketOpCode.Text = packet.PacketHeader.PacketId.ToString("X2");
+            txtPacketSize.Text = packet.PacketHeader.Size.ToString();
+            txtPacketTimeStamp.Text = packet.PacketHeader.TimeStamp.ToString();
+
+            this.Text = sb.ToString();
         }
 
         private byte[] tmpBuffer;
 
         private unsafe void hexPacketView_PositionChanged(object sender, EventArgs e)
         {
-            SetLogText();
-
             var currentSelectionStart = hexPacketView.SelectionStart;
 
             if (tmpBuffer == null)

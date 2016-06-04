@@ -25,6 +25,13 @@ namespace W2.PacketSniffer
 
             m_ignoredPackets = new IgnoredPackets();
 
+            if(Properties.Settings.Default.UpgradeRequired)
+            {
+                Properties.Settings.Default.Upgrade();
+                Properties.Settings.Default.UpgradeRequired = false;
+                Properties.Settings.Default.Save();
+            }
+
             if (Properties.Settings.Default.IgnorePackets)
                 m_ignoredPackets.LoadFromFile(Properties.Settings.Default.IgnoredPacketsFile);
         }
